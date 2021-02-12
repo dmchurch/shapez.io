@@ -502,10 +502,23 @@ export class Camera extends BasicSerializableObject {
         }
         const prevZoom = this.zoomLevel;
 
+        if (event.deltaY == 0) {
+            // horizontal scroll wheel, perhaps
+            return;
+        }
+
+        const basis =
+            event.deltaMode == WheelEvent.DOM_DELTA_PAGE
+                ? 1.0
+                : event.deltaMode == WheelEvent.DOM_DELTA_LINE
+                ? 3.0 // this is the standard Windows setting, firefox will use it
+                : 100 * window.devicePixelRatio; // most browsers besides Firefox will use pixels
+
         const scale = 1 + 0.15 * this.root.app.settings.getScrollWheelSensitivity();
+        const zoomRatio = Math.pow(scale, -event.deltaY / basis);
         assert(Number.isFinite(scale), "Got invalid scale in mouse wheel event: " + event.deltaY);
         assert(Number.isFinite(this.zoomLevel), "Got invalid zoom level *before* wheel: " + this.zoomLevel);
-        this.zoomLevel *= event.deltaY < 0 ? scale : 1 / scale;
+        this.zoomLevel *= zoomRatio;
         assert(Number.isFinite(this.zoomLevel), "Got invalid zoom level *after* wheel: " + this.zoomLevel);
 
         this.clampZoomLevel();
