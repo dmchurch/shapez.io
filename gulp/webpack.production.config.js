@@ -22,6 +22,7 @@ module.exports = ({
         assertAlways: "window.assert",
         abstract: "window.assert(false, 'abstract method called');",
         G_IS_DEV: "false",
+        G_IS_GITPOD: process.env.GITPOD_WORKSPACE_ID ? "true" : "false",
         G_IS_RELEASE: environment === "prod" ? "true" : "false",
         G_IS_STANDALONE: standalone ? "true" : "false",
         G_IS_BROWSER: isBrowser ? "true" : "false",

@@ -86,7 +86,10 @@ class LoaderImpl {
 
         return Promise.race([
             new Promise((resolve, reject) => {
-                setTimeout(reject, G_IS_DEV ? 500 : 10000);
+                setTimeout(() => {
+                    logger.warn("Preload timed out for " + url);
+                    reject("timed out");
+                }, G_IS_DEV && !G_IS_GITPOD ? 500 : 10000);
             }),
 
             new Promise(resolve => {
