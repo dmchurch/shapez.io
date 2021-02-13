@@ -1,6 +1,6 @@
 import { GameState } from "../core/game_state";
 import { cachebust } from "../core/cachebust";
-import { THIRDPARTY_URLS, SUPPORT_TOUCH } from "../core/config";
+import { THIRDPARTY_URLS, SUPPORT_TOUCH, globalConfig } from "../core/config";
 
 export class MobileWarningState extends GameState {
     constructor() {
@@ -39,6 +39,9 @@ export class MobileWarningState extends GameState {
 
     onEnter() {
         if (SUPPORT_TOUCH) {
+            if (G_IS_DEV && globalConfig.debug.fastGameEnter) {
+                this.moveToState("PreloadState");
+            }
             const mobileTestLink = this.htmlElement.querySelector(".mobile-test");
             this.trackClicks(mobileTestLink, () => this.moveToState("PreloadState"));
         }
