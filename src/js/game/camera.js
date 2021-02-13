@@ -62,6 +62,8 @@ export class Camera extends BasicSerializableObject {
         this.didMoveSinceTouchStart = false;
         this.currentlyPinching = false;
         this.lastPinchPositions = null;
+        this.singleTouchTimeout = null;
+        this.delayedSingleTouch = null;
 
         this.keyboardForce = new Vector();
 
@@ -311,6 +313,7 @@ export class Camera extends BasicSerializableObject {
         this.eventListenerMouseDown = this.onMouseDown.bind(this);
         this.eventListenerMouseMove = this.onMouseMove.bind(this);
         this.eventListenerMouseUp = this.onMouseUp.bind(this);
+        this.eventListenerDelayTouch = this.delayTouchFire.bind(this);
 
         if (SUPPORT_TOUCH) {
             this.root.canvas.addEventListener("touchstart", this.eventListenerTouchStart);
@@ -558,10 +561,12 @@ export class Camera extends BasicSerializableObject {
 
         clickDetectorGlobals.lastTouchTime = performance.now();
         this.touchPostMoveVelocity = new Vector(0, 0);
+        this.delayTouchCancel();
 
         if (event.touches.length === 1) {
             const touch = event.touches[0];
-            this.combinedSingleTouchStartHandler(touch.clientX, touch.clientY);
+            this.combinedSingleTouchStartHandler(touch.clientX, touch.clientY, true);
+            this.delayTouch(touch.clientX, touch.clientY);
         } else if (event.touches.length === 2) {
             // if (this.pinchPreHandler.dispatch() === STOP_PROPAGATION) {
             //     // Something prevented pinching
@@ -591,6 +596,7 @@ export class Camera extends BasicSerializableObject {
         }
 
         clickDetectorGlobals.lastTouchTime = performance.now();
+        this.delayTouchCancel(); // Moving a touch prevents it from being interpreted as a "click"
 
         if (event.touches.length === 1) {
             const touch = event.touches[0];
@@ -673,6 +679,10 @@ export class Camera extends BasicSerializableObject {
         clickDetectorGlobals.lastTouchTime = performance.now();
         if (event.changedTouches.length === 0) {
             logger.warn("Touch end without changed touches");
+        } else if (event.touches.length === 0) {
+            // Just released the last touch. If this is still in touch delay, that means this
+            // counts as a "click", so fire the delayed touch immediately before the touchStop below.
+            this.delayTouchFire();
         }
 
         const touch = event.changedTouches[0];
@@ -681,13 +691,50 @@ export class Camera extends BasicSerializableObject {
     }
 
     /**
-     * Internal touch start handler
+     * Hold a touch until after a short delay
      * @param {number} x
      * @param {number} y
      */
-    combinedSingleTouchStartHandler(x, y) {
+    delayTouch(x, y) {
+        this.delayTouchCancel();
+        this.delayedSingleTouch = { x, y };
+        this.singleTouchTimeout = setTimeout(this.eventListenerDelayTouch, globalConfig.singleTouchDelay);
+    }
+
+    /**
+     * Cancel a held touch without firing it
+     */
+    delayTouchCancel() {
+        if (this.singleTouchTimeout != null) {
+            clearTimeout(this.singleTouchTimeout);
+        }
+        this.delayedSingleTouch = null;
+        this.singleTouchTimeout = null;
+    }
+
+    /**
+     * Fire a held touch immediately
+     */
+    delayTouchFire() {
+        if (this.singleTouchTimeout != null && this.delayedSingleTouch != null) {
+            const touch = this.delayedSingleTouch;
+            this.delayTouchCancel(); // in case this was called manually
+            this.combinedSingleTouchStartHandler(touch.x, touch.y);
+        }
+    }
+
+    /**
+     * Internal touch start handler
+     * @param {number} x
+     * @param {number} y
+     * @param {boolean} suppressHandlers
+     */
+    combinedSingleTouchStartHandler(x, y, suppressHandlers = false) {
         const pos = new Vector(x, y);
-        if (this.downPreHandler.dispatch(pos, enumMouseButton.left) === STOP_PROPAGATION) {
+        if (
+            !suppressHandlers &&
+            this.downPreHandler.dispatch(pos, enumMouseButton.left) === STOP_PROPAGATION
+        ) {
             // Somebody else captured it
             return;
         }

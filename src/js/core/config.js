@@ -87,6 +87,9 @@ export const globalConfig = {
     minZoomLevel: 0.1,
     maxZoomLevel: 3,
 
+    // Input
+    singleTouchDelay: 200,
+
     // Global game speed
     gameSpeed: 1,
 
