@@ -13,6 +13,7 @@ declare const G_BUILD_TIME: number;
 declare const G_IS_STANDALONE: boolean;
 declare const G_IS_BROWSER: boolean;
 declare const G_IS_MOBILE_APP: boolean;
+declare const G_EXPERIMENTAL: string;
 
 declare const G_BUILD_COMMIT_HASH: string;
 declare const G_TRACKING_ENDPOINT: string;

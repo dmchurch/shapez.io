@@ -5,7 +5,7 @@ export const IS_DEBUG =
     (window.location.host.indexOf("localhost:") >= 0 || window.location.host.indexOf("192.168.0.") >= 0) &&
     window.location.search.indexOf("nodebug") < 0;
 
-export const SUPPORT_TOUCH = false;
+export const SUPPORT_TOUCH = G_EXPERIMENTAL.indexOf("touch-ui") >= 0;
 
 export const IS_MAC = navigator.platform.toLowerCase().indexOf("mac") >= 0;
 

@@ -1,6 +1,6 @@
 import { GameState } from "../core/game_state";
 import { cachebust } from "../core/cachebust";
-import { THIRDPARTY_URLS } from "../core/config";
+import { THIRDPARTY_URLS, SUPPORT_TOUCH } from "../core/config";
 
 export class MobileWarningState extends GameState {
     constructor() {
@@ -16,7 +16,10 @@ export class MobileWarningState extends GameState {
                 I'm sorry, but shapez.io is not available on mobile devices yet!
                 There is also no estimate when this will change, but feel to make a contribution! It's
                 &nbsp;<a href="https://github.com/tobspr/shapez.io" target="_blank">open source</a>!</p>
-            
+
+            ${SUPPORT_TOUCH ? `<p>
+                If you would like to test an UNSUPPORTED mobile play mode, please click <a class="mobile-test">here</a>.</p>
+            ` : ''}
             <p>If you want to play on your computer, you can also get the standalone on Steam:</p>
 
             
@@ -35,6 +38,10 @@ export class MobileWarningState extends GameState {
     }
 
     onEnter() {
+        if (SUPPORT_TOUCH) {
+            const mobileTestLink = this.htmlElement.querySelector(".mobile-test");
+            this.trackClicks(mobileTestLink, () => this.moveToState("PreloadState"));
+        }
         try {
             if (window.gtag) {
                 window.gtag("event", "click", {

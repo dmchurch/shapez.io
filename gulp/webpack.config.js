@@ -35,6 +35,7 @@ module.exports = ({ watch = false, standalone = false }) => {
                     lzString.compressToEncodedURIComponent("http://localhost:10005/v1")
                 ),
                 G_IS_DEV: "true",
+                G_EXPERIMENTAL: JSON.stringify(process.env.SHAPEZ_EXPERIMENTAL ?? ""),
                 G_IS_GITPOD: process.env.GITPOD_WORKSPACE_ID ? "true" : "false",
                 G_IS_RELEASE: "false",
                 G_IS_MOBILE_APP: "false",

@@ -16,12 +16,14 @@ module.exports = ({
     standalone = false,
     isBrowser = true,
     mobileApp = false,
+    experimental = "",
 }) => {
     const globalDefs = {
         assert: enableAssert ? "window.assert" : "false && window.assert",
         assertAlways: "window.assert",
         abstract: "window.assert(false, 'abstract method called');",
         G_IS_DEV: "false",
+        G_EXPERIMENTAL: JSON.stringify(experimental),
         G_IS_GITPOD: process.env.GITPOD_WORKSPACE_ID ? "true" : "false",
         G_IS_RELEASE: environment === "prod" ? "true" : "false",
         G_IS_STANDALONE: standalone ? "true" : "false",
