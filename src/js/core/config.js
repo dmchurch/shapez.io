@@ -50,7 +50,8 @@ export const globalConfig = {
 
     // Map
     mapChunkSize: 16,
-    mapChunkOverviewMinZoom: 0.9,
+    mapChunkOverviewMinZoom: 0.5, // this and below are adjusted in ../game/camera.js
+    mapChunkOverviewMinZoomHasBeenPrescaled: false,
     mapChunkWorldSize: null, // COMPUTED
 
     // Belt speeds

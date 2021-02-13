@@ -44,6 +44,12 @@ export class Camera extends BasicSerializableObject {
         this.zoomLevel = this.findInitialZoom();
         this.clampZoomLevel();
 
+        // prescale the map changeover point based on screen size
+        if (!globalConfig.mapChunkOverviewMinZoomHasBeenPrescaled) {
+            globalConfig.mapChunkOverviewMinZoom *= this.zoomLevel;
+            globalConfig.mapChunkOverviewMinZoomHasBeenPrescaled = true;
+        }
+
         /** @type {Vector} */
         this.center = new Vector(0, 0);
 
