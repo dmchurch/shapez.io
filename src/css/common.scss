@@ -668,6 +668,34 @@ input.rangeInput {
     }
 }
 
+.touchtool {
+    background: #fff;
+    text-transform: uppercase;
+    @include S(padding, 1.5px, 3px, 2px);
+    @include PlainText;
+    @include S(border-radius, $globalBorderRadius);
+    @include S(font-size, 9px);
+    @include S(line-height, 11px);
+    font-weight: bold !important;
+    text-shadow: none !important;
+    // font-family: Arial, sans-serif !important;
+    font-weight: bold;
+    color: $accentColorDark;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    @include S(min-width, 32px);
+    display: inline-flex;
+    position: absolute;
+    @include S(bottom, 0px);
+    @include S(right, 0px);
+    z-index: 999;
+    box-sizing: border-box;
+    @include S(height, 32px);
+    overflow: hidden;
+    border: #{D(0px)} solid $accentColorDark;
+}
+
 .keybinding {
     background: #fff;
     text-transform: uppercase;

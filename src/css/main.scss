@@ -33,6 +33,7 @@
 @import "ingame_hud/building_placer";
 @import "ingame_hud/beta_overlay";
 @import "ingame_hud/keybindings_overlay";
+@import "ingame_hud/touch_tools";
 @import "ingame_hud/unlock_notification";
 @import "ingame_hud/shop";
 @import "ingame_hud/game_menu";
@@ -54,10 +55,11 @@
 @import "ingame_hud/sandbox_controller";
 @import "ingame_hud/standalone_advantages";
 @import "ingame_hud/cat_memes";
+@import "ingame_hud/display_sizer";
 
 // prettier-ignore
-$elements: 
-// Base    
+$elements:
+// Base
 ingame_Canvas,
 ingame_VignetteOverlay,
 
@@ -70,6 +72,7 @@ ingame_HUD_PlacerVariants,
 ingame_HUD_PinnedShapes,
 ingame_HUD_GameMenu,
 ingame_HUD_KeybindingOverlay,
+ingame_HUD_TouchTools,
 ingame_HUD_Notifications,
 ingame_HUD_DebugInfo,
 ingame_HUD_EntityDebugger,

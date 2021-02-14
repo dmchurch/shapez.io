@@ -15,7 +15,7 @@ import { HUDKeybindingOverlay } from "./parts/keybinding_overlay";
 import { HUDUnlockNotification } from "./parts/unlock_notification";
 import { HUDGameMenu } from "./parts/game_menu";
 import { HUDShop } from "./parts/shop";
-import { IS_MOBILE, globalConfig } from "../../core/config";
+import { globalConfig, SUPPORT_TOUCH } from "../../core/config";
 import { HUDMassSelector } from "./parts/mass_selector";
 import { HUDVignetteOverlay } from "./parts/vignette_overlay";
 import { HUDStatistics } from "./parts/statistics";
@@ -49,6 +49,8 @@ import { HUDStandaloneAdvantages } from "./parts/standalone_advantages";
 import { HUDCatMemes } from "./parts/cat_memes";
 import { HUDTutorialVideoOffer } from "./parts/tutorial_video_offer";
 import { HUDConstantSignalEdit } from "./parts/constant_signal_edit";
+import { HUDDisplaySizer } from "./parts/display_sizer";
+import { HUDTouchTools } from "./parts/touch_tools";
 
 export class GameHUD {
     /**
@@ -111,8 +113,11 @@ export class GameHUD {
             /* typehints:end */
         };
 
-        if (!IS_MOBILE) {
-            this.parts.keybindingOverlay = new HUDKeybindingOverlay(this.root);
+        this.parts.keybindingOverlay = new HUDKeybindingOverlay(this.root);
+
+        if (SUPPORT_TOUCH) {
+            this.parts.displaySizer = new HUDDisplaySizer(this.root);
+            this.parts.touchTools = new HUDTouchTools(this.root);
         }
 
         if (G_IS_DEV && globalConfig.debug.enableEntityInspector) {

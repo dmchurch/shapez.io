@@ -71,6 +71,10 @@
     }
 }
 
+body.touchMode #ingame_HUD_KeybindingOverlay {
+    display: none;
+}
+
 body.uiHidden #ingame_HUD_KeybindingOverlay .binding:not(.hudToggle) {
     display: none;
 }

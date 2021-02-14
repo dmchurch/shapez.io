@@ -89,6 +89,9 @@ export const globalConfig = {
 
     // Input
     singleTouchDelay: 200,
+    touchMoveHysteresisRadiusMm: 2.0, // in millimeters! moving a finger less than this amount within the singleTouchDelay doesn't count as a drag
+    touchMoveHysteresisRadiusPx: 5.0, // this is just a reasonable default, the true value will be calculated by HUDDisplaySizer
+    touchModeUi: false, // display UI hints for touch instead of mouse?
 
     // Global game speed
     gameSpeed: 1,

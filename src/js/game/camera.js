@@ -1,5 +1,5 @@
 import { clickDetectorGlobals } from "../core/click_detector";
-import { globalConfig, SUPPORT_TOUCH } from "../core/config";
+import { globalConfig, IS_MOBILE, SUPPORT_TOUCH } from "../core/config";
 import { createLogger } from "../core/logging";
 import { Rectangle } from "../core/rectangle";
 import { Signal, STOP_PROPAGATION } from "../core/signal";
@@ -62,7 +62,6 @@ export class Camera extends BasicSerializableObject {
         this.didMoveSinceTouchStart = false;
         this.currentlyPinching = false;
         this.lastPinchPositions = null;
-        this.singleTouchTimeout = null;
         this.delayedSingleTouch = null;
 
         this.keyboardForce = new Vector();
@@ -90,6 +89,10 @@ export class Camera extends BasicSerializableObject {
 
         /** @type {Vector} */
         this.touchPostMoveVelocity = new Vector(0, 0);
+
+        if (IS_MOBILE) {
+            this.setTouchModeUi(true); // just a default, can still be overridden by using a mouse
+        }
 
         // Handlers
         this.downPreHandler = /** @type {TypedSignal<[Vector, enumMouseButton]>} */ (new Signal());
@@ -303,6 +306,23 @@ export class Camera extends BasicSerializableObject {
     }
 
     /**
+     * Sets whether to display touch-mode UI hints, or mouse-mode. Updates whenever an input
+     * device is used.
+     * @param {boolean} touchMode
+     */
+    setTouchModeUi(touchMode) {
+        if (globalConfig.touchModeUi !== touchMode) {
+            globalConfig.touchModeUi = touchMode;
+            if (touchMode) {
+                document.body.classList.add("touchMode");
+            } else {
+                document.body.classList.remove("touchMode");
+            }
+            // put a listenable event handler here at some point
+        }
+    }
+
+    /**
      * Attaches all event listeners
      */
     internalInitEvents() {
@@ -446,6 +466,8 @@ export class Camera extends BasicSerializableObject {
             return;
         }
 
+        this.setTouchModeUi(false);
+
         this.touchPostMoveVelocity = new Vector(0, 0);
         if (event.button === 0) {
             this.combinedSingleTouchStartHandler(event.clientX, event.clientY);
@@ -562,6 +584,7 @@ export class Camera extends BasicSerializableObject {
         clickDetectorGlobals.lastTouchTime = performance.now();
         this.touchPostMoveVelocity = new Vector(0, 0);
         this.delayTouchCancel();
+        this.setTouchModeUi(true);
 
         if (event.touches.length === 1) {
             const touch = event.touches[0];
@@ -596,10 +619,26 @@ export class Camera extends BasicSerializableObject {
         }
 
         clickDetectorGlobals.lastTouchTime = performance.now();
-        this.delayTouchCancel(); // Moving a touch prevents it from being interpreted as a "click"
 
         if (event.touches.length === 1) {
             const touch = event.touches[0];
+            if (this.delayedSingleTouch) {
+                // hysteresis applies, don't do anything unless we go outside the radius
+                const distance = new Vector(
+                    touch.clientX - this.delayedSingleTouch.x,
+                    touch.clientY - this.delayedSingleTouch.y
+                ).length();
+                logger.debug(
+                    "Checking touch move distance:",
+                    distance,
+                    "vs hysteresis:",
+                    globalConfig.touchMoveHysteresisRadiusPx
+                );
+                if (distance < globalConfig.touchMoveHysteresisRadiusPx) {
+                    return false;
+                }
+            }
+            this.delayTouchCancel(); // Moving a touch prevents it from being interpreted as a "click"
             this.combinedSingleTouchMoveHandler(touch.clientX, touch.clientY);
         } else if (event.touches.length === 2) {
             if (this.currentlyPinching) {
@@ -697,26 +736,28 @@ export class Camera extends BasicSerializableObject {
      */
     delayTouch(x, y) {
         this.delayTouchCancel();
-        this.delayedSingleTouch = { x, y };
-        this.singleTouchTimeout = setTimeout(this.eventListenerDelayTouch, globalConfig.singleTouchDelay);
+        this.delayedSingleTouch = {
+            x,
+            y,
+            timeout: setTimeout(this.eventListenerDelayTouch, globalConfig.singleTouchDelay),
+        };
     }
 
     /**
      * Cancel a held touch without firing it
      */
     delayTouchCancel() {
-        if (this.singleTouchTimeout != null) {
-            clearTimeout(this.singleTouchTimeout);
+        if (this.delayedSingleTouch != null) {
+            clearTimeout(this.delayedSingleTouch.timeout);
         }
         this.delayedSingleTouch = null;
-        this.singleTouchTimeout = null;
     }
 
     /**
      * Fire a held touch immediately
      */
     delayTouchFire() {
-        if (this.singleTouchTimeout != null && this.delayedSingleTouch != null) {
+        if (this.delayedSingleTouch != null) {
             const touch = this.delayedSingleTouch;
             this.delayTouchCancel(); // in case this was called manually
             this.combinedSingleTouchStartHandler(touch.x, touch.y);
